@@ -1,19 +1,48 @@
 #!/usr/bin/env python3
-"""One Letter: Coffee or Tea — entry "A" (coffee).
+"""One Letter: Coffee or Tea — the entry is "A".
 
-Writes exactly one character, "A", to /output/entry.txt: no newline,
-no other content. Coffee: the vivid, punchy, honest answer.
+The bounty asks for a single letter: one for coffee, one for tea.
+"A" is the coffee answer — vivid, punchy, honest — so the program
+writes exactly that one byte to /output/entry.txt. Nothing else is
+written: no newline, no trailing space, no extra file.
+
+Pure standard library, deterministic: the same byte every run.
 """
 
 import os
 
+# The chosen letter. "A" stands for coffee.
+CHOSEN_LETTER = "A"
+
 OUTPUT_PATH = "/output/entry.txt"
 
 
+def single_byte_text(letter: str) -> bytes:
+    """Encode `letter` and require it to be exactly one character.
+
+    This guards the whole point of the entry: a one-letter answer.
+    Anything longer or shorter is a bug, so fail loudly instead of
+    writing a wrong output file.
+    """
+    if len(letter) != 1:
+        raise ValueError("entry must be exactly one letter, got %r" % letter)
+    encoded = letter.encode("utf-8")
+    if len(encoded) != 1:
+        raise ValueError("letter %r is not a single byte" % letter)
+    return encoded
+
+
+def write_entry(path: str, letter: str) -> int:
+    """Write the single chosen byte to `path`; return bytes written."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    payload = single_byte_text(letter)
+    with open(path, "wb") as handle:
+        handle.write(payload)
+    return len(payload)
+
+
 def main() -> None:
-    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
-    with open(OUTPUT_PATH, "w", encoding="utf-8", newline="") as f:
-        f.write("A")
+    write_entry(OUTPUT_PATH, CHOSEN_LETTER)
 
 
 if __name__ == "__main__":
